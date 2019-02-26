@@ -52,7 +52,7 @@ void Draw() {
 	glClear(GL_COLOR_BUFFER_BIT);
 	glPointSize(1.0);
 	
-	Draw1();
+	count_Colors();
 	#pragma omp parallel private(x, y)
     #pragma omp for collapse(8) schedule(dynamic, CHUNK)
 	{
@@ -88,7 +88,7 @@ void Initialize() {
 
 int main(int argc, char **argv) {
 	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGB);
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
 	glutInitWindowSize(WinWid, WinHei);
 	glutInitWindowPosition(100, 200);
 	glutCreateWindow("RayTracing");
