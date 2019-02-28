@@ -1,1 +1,1 @@
-g++ -std=c++11 main.cpp geom.cpp -o main
+g++ main.cpp geom.cpp -o main -g -lglut -lGLU -lGLEW -IGLEW -lGL
