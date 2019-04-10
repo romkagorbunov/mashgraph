@@ -2,6 +2,8 @@
 
 extern vector<TLight> lights;
 extern vector<TObject*> objects;
+extern const int refDepth;
+extern CImg<unsigned char> src;
 
 ld ComputeLight(TPoint P, TVector N, TPoint V, ld s) {
     ld answer = 0;
