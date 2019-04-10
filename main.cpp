@@ -1,4 +1,5 @@
 #include "geom.h"
+#include "CImg.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
@@ -14,6 +15,7 @@
 #define pb push_back
 
 using namespace std;
+using namespace cimg_library;
 
 const int WinWid = 1600;
 const int WinHei = 1600;
@@ -23,8 +25,9 @@ ld hei = 1;
 
 const int refDepth = 4;
 vector<TPoint> tasks;
+CImg<unsigned char> src("envmap.jpg");
 
-TRay camera = TRay(TPoint(0, 5, 20), TVector(0, 0, -1));
+TRay camera = TRay(TPoint(0, 5, -20), TVector(0, 0, 1));
 TColor color;
 vector<TObject*> objects;
 vector<TLight> lights;
@@ -48,6 +51,10 @@ void render() {
 			TVector cur = curx * xx + cury * yy;
 			TRay go = TRay(camera.position, camera.direction + cur);
 			answer[x + WinWid / 2][y + WinHei / 2] = TraceRay(go, 1e-3, inf / 2, refDepth);
+			if (answer[x + WinWid / 2][y + WinHei / 2] == TColor(0, 0, 0)) {
+				unsigned char *a = src.data(src.width() - (x + WinWid / 2) * src.width() / WinWid, src.height() - (y + WinHei / 2) * src.height() / WinHei);
+				answer[x + WinWid / 2][y + WinHei / 2] = TColor((ld)a[0] / 255.0, (ld)a[1] / 255.0, (ld)a[2] / 255.0);
+			}
 		}
 	}
 	for (int x = -WinWid / 2; x <= WinWid / 2; x += 1) {
@@ -101,17 +108,23 @@ int main(int argc, char **argv) {
 	glutInitWindowPosition(100, 200);
 	glutCreateWindow("RayTracing");
 
+
 	TSphere* sphere;
 
 	sphere = new TSphere(TPoint(0, 0, 0), 1, TObject(TColor(1, 0, 0), 10, 0.2));
 	objects.pb(sphere);
 	sphere = new TSphere(TPoint(2, 2, 0), 1, TObject(TColor(0, 1, 0), 10, 0.2));
 	objects.pb(sphere);
-	sphere = new TSphere(TPoint(0, -5000, 0), 4999, TObject(TColor(1, 0, 1), 20, 0.1));
-	objects.pb(sphere);
+	//sphere = new TSphere(TPoint(0, -5000, 0), 4999, TObject(TColor(1, 0, 1), 20, 0.4));
+	//objects.pb(sphere);
+
+	TCylinder* cylinder;
+
+	cylinder = new TCylinder(TPoint(0, 2, 0), TVector(-7, 7, 0), 1, TObject(TColor(1, 1, 0), 10, 0.2));
+	objects.pb(cylinder);
 
 	lights.pb(TLight(Ambient, 0.2, TPoint()));
-	lights.pb(TLight(Point, 0.8, TPoint(50, 50, 10)));
+	lights.pb(TLight(Point, 0.8, TPoint(100, 100, 0)));
 	
 	glutDisplayFunc(Draw);
 	Initialize();

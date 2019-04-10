@@ -1,7 +1,9 @@
 #include <bits/stdc++.h>
+#include "CImg.h"
 #define mp make_pair
 
 using namespace std;
+using namespace cimg_library;
 
 typedef double ld;
 
@@ -86,6 +88,9 @@ struct TColor {
 		g = G;
 		b = B;
 	}
+	bool operator == (const TColor &a) {
+		return r == a.r && g == a.g && b == a.b;
+	}
 	TColor operator + (const TColor &a) {
 	    return TColor(r + a.r, g + a.g, b + a.b);
 	}
@@ -133,6 +138,57 @@ struct TObject {
     virtual ld intersect(const TRay &camera, ld l, ld r) {
 		cerr << "FUCK THIS SHIT" << endl;
     }
+};
+
+struct TCylinder : TObject {
+	TPoint base;
+	TVector direction;
+	ld radius;
+	TCylinder(TPoint _base = TPoint(), TVector _direction = TVector(), ld _radius = 0, TObject _obj = TObject()) {
+		base = _base;
+		direction = _direction;
+		radius = _radius;
+		color = _obj.color;
+		specular = _obj.specular;
+		reflective = _obj.reflective;
+	}
+	ld distance(TPoint camera) {
+		if ((direction ^ (camera - base)) < 0) {
+			return abs((camera - base).len() - radius);
+		} else if (((-direction) ^ (camera - (base + direction))) < 0) {
+			return abs((camera - (base + direction)).len() - radius);
+		} else {
+			return abs(abs((direction * (camera - base)).len()) / direction.len() - radius);
+		}
+	}
+	TVector getN(const TPoint &camera, const TPoint &point_on_object) override {
+		if ((direction ^ (point_on_object - base)) < 0) {
+			return (point_on_object - base) / (point_on_object - base).len();
+		} else if (((-direction) ^ (point_on_object - (base + direction))) < 0) {
+			return (point_on_object - (base + direction)) / (point_on_object - (base + direction)).len();
+		} else {
+			TVector mid = (direction * (point_on_object - base));
+			mid = mid / mid.len();
+			TVector answer = (direction * mid);
+			answer = answer / answer.len();
+			return -answer;
+		}
+	}
+	ld intersect(const TRay &camera, ld l, ld r) override {
+		TPoint cur_point = camera.position + camera.direction * l / camera.direction.len();
+		ld answer = 0;
+		ld cur_dist = inf;
+		int max_cnt = 100;
+		int cnt = 0;
+		while ((cur_dist = this->distance(cur_point)) > 1e-1 || cur_dist > 1e4) {
+			answer += cur_dist;
+			cur_point += camera.direction / camera.direction.len() * cur_dist;
+			if (cnt++ > max_cnt) {
+				break;
+			}
+		}
+		return (cnt > max_cnt ? inf : answer);
+	}
 };
 
 struct TSphere : TObject {
